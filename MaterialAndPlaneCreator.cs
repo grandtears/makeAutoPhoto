@@ -1,4 +1,4 @@
-MaterialAndPlaneCreatorusing System.IO;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
@@ -11,7 +11,9 @@ public class MaterialAndPlaneCreator : MonoBehaviour
         // フォルダパスの指定
         string imageFolderPath = "Assets/Images"; // Assetsフォルダ内の画像フォルダを指定
         Vector3 startPosition = Vector3.zero;     // Planeの初期位置
-        float spacing = 1.0f;                    // Plane間のスペーシング（余裕分）
+        float spacing = 1.0f;                    // Plane間のスペーシング
+        int maxColumns = 20;                     // 1行に並べる最大数
+        int currentColumn = 0;                   // 現在の列数（行のカウント用）
 
         // フォルダが存在するか確認
         if (!Directory.Exists(imageFolderPath))
@@ -31,7 +33,7 @@ public class MaterialAndPlaneCreator : MonoBehaviour
             return;
         }
 
-        Vector3 currentPosition = startPosition;
+        Vector3 currentPosition = startPosition; // 配置位置
 
         foreach (string filePath in imageFiles)
         {
@@ -72,8 +74,21 @@ public class MaterialAndPlaneCreator : MonoBehaviour
             // Planeの横幅（スケール x デフォルト幅10）を計算
             float planeWidth = newPlane.transform.localScale.x * 10;
 
-            // 次のPlaneの配置位置を計算（現在の位置 + 横幅 + スペーシング）
-            currentPosition.x += planeWidth + spacing;
+            // 次のPlaneの配置位置を計算
+            currentColumn++; // 1つ追加
+            
+            if (currentColumn >= maxColumns)
+            {
+                // 20枚配置したら改行（Z軸方向に移動）
+                currentColumn = 0;
+                currentPosition.x = startPosition.x; // X位置をリセット
+                currentPosition.z -= 12; // 1行分下げる（10+余白2）
+            }
+            else
+            {
+                // 通常の配置（横方向）
+                currentPosition.x += planeWidth + spacing;
+            }
         }
 
         // アセットデータベースを更新
